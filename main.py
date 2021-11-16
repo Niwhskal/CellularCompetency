@@ -37,7 +37,7 @@ class TwoFit():
 
     self.tsne_fitness += [self.cfs.fitness(i) for i in self.init_organisms]
 
-    while round(max_raw, 2) != 1.00 and generation < 1000: 
+    while round(max_raw, 2) != 1.00 and generation < self.config['MAX_ITER']: 
       
       fittest_organisms, most_fit_organism = self.cfs.selection(self.init_organisms, ap_fit)
       new_population = self.cfs.crossover_mutation(fittest_organisms)
@@ -66,17 +66,17 @@ class TwoFit():
 
   def plot_fitness(self): 
     plt.rcParams["figure.figsize"] = (20,10)
-    plt.plot(len(self.raw_fitness), self.raw_fitness, label = 'Raw_fitness')
-    plt.plot(len(self.app_fitness), self.app_fitness, label = 'App_fitness')
+    plt.plot(list(range(len(self.raw_fitness))), self.raw_fitness, label = 'Raw_fitness')
+    plt.plot(list(range(len(self.app_fitness))), self.app_fitness, label = 'App_fitness')
     plt.xlabel('Generations')
     plt.ylabel('Max Fitness')
     plt.title('Same organism, two fitness levels')
-    plt.show()
+    plt.savefig('Fitness')
 
   def tsne_plot(self, nos):
     plt.rcParams["figure.figsize"] = (20,10)
-    print('TSNE in progress for data matrix of size: {}'.format(self.to_tsne_organisms[nos, :].shape))
-    X_embedded = TSNE(n_components=2).fit_transform(self.to_tsne_organisms[nos, :])
+    print('TSNE in progress for data matrix of size: {}'.format(self.to_tsne_organisms[nos:, :].shape))
+    X_embedded = TSNE(n_components=2).fit_transform(self.to_tsne_organisms[nos:, :])
 
     print('TSNE completed\n')
     print('Embedding Dimension: {}'.format(X_embedded.shape))
@@ -85,7 +85,7 @@ class TwoFit():
     ax = fig.gca(projection="3d")
     ax.plot(X_embedded[:,0], X_embedded[:,1], self.tsne_fitness, label='fitness curve')
     ax.legend()
-    plt.show()
+    plt.savefig('tsne')
 
 
 if __name__ == "__main__":
@@ -96,6 +96,8 @@ if __name__ == "__main__":
   'N_organisms' : 100,
   'SIZE' : 100,
   'Mutation_Probability' : 0.6,
+  'LIMIT': 100,
+  'MAX_ITER' : 1000,
   }
 
   cfs = HelperFuncs(conf)
@@ -103,4 +105,4 @@ if __name__ == "__main__":
 
   run1.run_ga()
   run1.plot_fitness()
-  run1.tsne_plot(100)
+  #run1.tsne_plot(100)

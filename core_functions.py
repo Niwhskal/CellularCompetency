@@ -94,6 +94,9 @@ class HelperFuncs():
           org[n] = org[n+1] 
           org[n+1] = temp
           count +=1
+        if count >self.config['LIMIT']:
+          count =0
+          break
         n+=1
     return orgs, count/len(orgs)
 
