@@ -100,13 +100,74 @@ class HelperFuncs():
         n+=1
     return orgs, count/len(orgs)
 
+  def advanced_reorganize(self, all_orgs, flag='normal'):
+    a_orgs = all_orgs.copy()
+    all_fits = [self.fitness(i) for i in a_orgs]
+    for nos, org in enumerate(a_orgs):
+      if flag == 'normal':
+        fov = round((3**(-2*all_fits[nos])) * self.config['MAX_FIELD'])
+        N = np.random.randint(self.config['LOW'], fov)
+      elif flag == 'random':
+        N = np.random.randint(self.config['LOW'], self.config['HIGH'])
+      for pos, current_cell in enumerate(org):
+        if pos-N >=0:
+          if org[pos-N] > current_cell:
+            temp = org[pos]
+            org[pos] = org[pos-N]
+            org[pos-N] = temp
+        if pos+N < self.config['SIZE']:
+          if org[pos+N] < current_cell:
+            temp = org[pos]
+            org[pos] = org[pos+N]
+            org[pos+N] = temp
+    
+    return a_orgs
 
-  if __name__=='__main__':
-    conf = {
-      'LOW' :1,
-      'HIGH':101,
-      'N_organisms' : 100,
-      'SIZE' : 100,
-      'Mutation_Probability' : 0.6,
-      }
-    funcs = HelperFuncs(conf)
+def super_advanced_reorganize(self, all_orgs, flag='normal'):
+    a_orgs = all_orgs.copy()
+    all_fits = [self.fitness(i) for i in a_orgs]
+    for nos, org in enumerate(a_orgs):
+      M = np.random.randint(self.config['LOW'], self.config['HIGH'])
+      if flag == 'normal':
+        fov = round((3**(-2*all_fits[nos])) * self.config['MAX_FIELD'])
+        N = np.random.randint(self.config['LOW'], fov)
+      elif flag == 'random':
+        N = np.random.randint(self.config['LOW'], self.config['HIGH'])
+      for pos in range(self.config['SIZE']): 
+        if pos-N >=0: # get left slice
+          l_slice = org[pos-N: pos]
+
+        if pos+N < self.config['SIZE']:
+          r_slice = org[pos: pos+N] 
+        
+        l_pos = np.where(l_slice > org[pos])[0][-1] + (pos-N)
+        r_pos = np.where(r_slice < org[pos])[0][0] + pos
+
+        if len(l_pos):
+          temp = org[pos]
+          org[pos] = org[l_pos]
+          org[l_pos] = temp
+        else:
+          temp = org[pos]
+          org[pos] = org[r_pos]
+          org[r_pos] = temp    
+
+    return a_orgs
+
+
+      
+      
+
+
+if __name__=='__main__':
+  conf = {
+    'LOW' :1,
+    'HIGH':11,
+    'N_organisms' : 5,
+    'SIZE' : 10,
+    'Mutation_Probability' : 0.6,
+    'MAX_FIELD' : 15,
+    }
+  funcs = HelperFuncs(conf)
+  test_org = np.random.randint(conf['LOW'], conf['HIGH'], (conf['N_organisms'], conf['SIZE']))
+  funcs.advanced_reorganize(test_org, flag ='random')
