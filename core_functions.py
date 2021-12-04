@@ -123,7 +123,7 @@ class HelperFuncs():
     
     return a_orgs
 
-def super_advanced_reorganize(self, all_orgs, flag='normal'):
+  def super_advanced_reorganize(self, all_orgs, flag='normal'):
     a_orgs = all_orgs.copy()
     all_fits = [self.fitness(i) for i in a_orgs]
     for nos, org in enumerate(a_orgs):
@@ -136,27 +136,25 @@ def super_advanced_reorganize(self, all_orgs, flag='normal'):
       for pos in range(self.config['SIZE']): 
         if pos-N >=0: # get left slice
           l_slice = org[pos-N: pos]
+          l_indexes = np.where(l_slice > (org[pos]+M))[0]
+          if len(l_indexes):
+            l_pos = l_indexes[-1] + (pos-N)
+            temp = org[pos]
+            org[pos] = org[l_pos]
+            org[l_pos] = temp
 
         if pos+N < self.config['SIZE']:
           r_slice = org[pos: pos+N] 
-        
-        l_pos = np.where(l_slice > org[pos])[0][-1] + (pos-N)
-        r_pos = np.where(r_slice < org[pos])[0][0] + pos
 
-        if len(l_pos):
-          temp = org[pos]
-          org[pos] = org[l_pos]
-          org[l_pos] = temp
-        else:
-          temp = org[pos]
-          org[pos] = org[r_pos]
-          org[r_pos] = temp    
+          r_indexes = np.where(r_slice < abs(org[pos]-M))[0]
+          if len(r_indexes):
+            r_pos = r_indexes[0] + pos
+            temp = org[pos]
+            org[pos] = org[r_pos]
+            org[r_pos] = temp    
 
     return a_orgs
 
-
-      
-      
 
 
 if __name__=='__main__':
@@ -170,4 +168,4 @@ if __name__=='__main__':
     }
   funcs = HelperFuncs(conf)
   test_org = np.random.randint(conf['LOW'], conf['HIGH'], (conf['N_organisms'], conf['SIZE']))
-  funcs.advanced_reorganize(test_org, flag ='random')
+  funcs.super_advanced_reorganize(test_org, flag ='normal')

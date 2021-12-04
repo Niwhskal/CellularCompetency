@@ -24,8 +24,9 @@ class TwoFit():
     self.tsne_raw_fitness=[]
     self.tsne_ap_fitness = []
 
-#    self.competent_mod, _ = self.cfs.reorganize(self.init_organisms)
-    self.competent_mod = self.cfs.advanced_reorganize(self.init_organisms, flag=self.config['MODE'])
+    #self.competent_mod, _ = self.cfs.reorganize(self.init_organisms)
+    #self.competent_mod = self.cfs.advanced_reorganize(self.init_organisms, flag=self.config['MODE'])
+    self.competent_mod = self.cfs.super_advanced_reorganize(self.init_organisms, flag=self.config['MODE'])
 
 
     r_fit = [self.cfs.fitness(i) for i in self.init_organisms]
@@ -53,7 +54,8 @@ class TwoFit():
 
 
       #self.competent_mod, _ = self.cfs.reorganize(self.init_organisms)
-      self.competent_mod = self.cfs.advanced_reorganize(self.init_organisms, flag=self.config['MODE'])
+      #self.competent_mod = self.cfs.advanced_reorganize(self.init_organisms, flag=self.config['MODE'])
+      self.competent_mod = self.cfs.super_advanced_reorganize(self.init_organisms, flag=self.config['MODE'])
 
       r_fit = [self.cfs.fitness(i) for i in self.init_organisms]
       ap_fit = [self.cfs.fitness(j) for j in self.competent_mod]
@@ -116,5 +118,5 @@ if __name__ == "__main__":
   run1 = TwoFit(conf, cfs)
 
   run1.run_ga()
-  run1.plot_fitness(tit='Only N, field: restricted')
+  run1.plot_fitness(tit='N field: restricted, M : random in (1,51)')
   #run1.tsne_plot(6000)
