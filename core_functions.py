@@ -1,6 +1,10 @@
 import math
 import numpy as np
-
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+from torch.utils.data import Dataset, DataLoader
+from torchvision import transforms, utils
 
 class HelperFuncs():
   def __init__(self, conf):
@@ -13,7 +17,12 @@ class HelperFuncs():
       for j in range(i + 1, len(o)):
         if (o[i] < o[j]):
           inv_count += 1
-    return inv_count/self.ncr
+
+    x_val = inv_count/self.ncr
+    if self.config['ExpFitness'] == True:
+      return (9**x_val) / 9 
+    else:
+      return x_val
 
 
   def selection(self, ory, fi):
@@ -154,6 +163,49 @@ class HelperFuncs():
             org[r_pos] = temp    
 
     return a_orgs
+
+  def percentage_fit(self, r_fits, c_fits):
+    r_f = r_fits.copy()
+    c_f = c_fits.copy()
+
+    r_f = np.array(r_f)
+    c_f = np.array(c_f)
+
+    percent_fit_raw = len(np.where(r_f == 1.0)[0])/len(r_f)
+    perfect_fit_comp = len(np.where(c_f == 1.0)[0])/len(c_f)
+
+    return perfect_fit_raw, perfect_fit_comp
+
+class AE(nn.Module):
+  def __init__(self, inp_shape, config):
+    super(AE, self).__init__()   
+    
+    self.config = config
+    self.l1 = nn.Linear(self.config['SIZE'], 25)
+    self.emb = nn.Linear(25, 2)
+    self.rev_l1 = nn.Linear(2, 25)
+    self.out = nn.Linear(25, self.config['SIZE'])
+
+  def forward(self, x):
+    x = F.relu(self.l1(x)) 
+    embed = F.relu(self.emb(x))
+    rev_x = F.relu(self.rev_l1(embed))
+    o = self.out(rev_x)
+
+    return embed, o
+
+class linearDataset(Dataset):
+  def __init__(self, x, con):
+    self.config = con 
+    self.X = x
+
+  def __len__(self):
+    return len(self.X)
+
+  def __getitem__(self, idx):
+    sample = self.X[idx, :] / self.config['SIZE']
+    ten = torch.from_numpy(sample)
+    return ten.type(torch.float)
 
 
 
