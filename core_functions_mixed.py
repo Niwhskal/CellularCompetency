@@ -24,6 +24,7 @@ class HelperFuncs():
     else:
       return x_val
 
+
   def selection(self, ory, fi):
     organisms = ory.copy()
     fitne = fi.copy()
@@ -41,7 +42,7 @@ class HelperFuncs():
 
   def combined_selection(self, ory):
     organisms = ory.copy()
-    pseudo_organisms = np.array([i[1:] if i[0] == -1 else self.super_advanced_reorganize(i[1:], single_sample=True) for i in organisms])
+    pseudo_organisms = np.array([i[1:] if i[0] == -2 else self.super_advanced_reorganize(i[1:], single_sample=True) for i in organisms])
     fitnessess = [self.fitness(j) for j in pseudo_organisms]
 
     return(self.selection(organisms, fitnessess))
@@ -63,7 +64,7 @@ class HelperFuncs():
 
     for i in range(len(organisms)):
       if np.random.rand(1) > self.config['Mutation_Probability']:
-        organisms[i][np.random.randint(self.config['SIZE'])] = np.random.randint(low = self.config['LOW'], high=self.config['HIGH'])
+        organisms[i][np.random.randint(low = 1, high=self.config['SIZE'])] = np.random.randint(low = self.config['LOW'], high=self.config['HIGH'])
 
     return organisms     
 
