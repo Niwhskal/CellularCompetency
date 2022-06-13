@@ -6,7 +6,6 @@ from tqdm import tqdm
 plt.rcParams["figure.figsize"] = (7, 9.5)
 
 def run_ga (config, HW):
-    #np.random.seed(0)
 
     init_population = np.random.randint(low = config['LOW'], high=config['HIGH'], size=(config['N_organisms'], config['SIZE']))
 
@@ -46,34 +45,40 @@ def run_ga (config, HW):
         print('Plotting Comp')
         return HTracker, CTracker
 
-def plot_all(bubbles):
+def plot_all(bubbles, tar):
 
-    hw_runs = np.load('./exp1/Hw_bubblesort.npy')
-    comp_genome_runs = np.load('./exp1/Comp_genome_bubblesort.npy')
-    comp_phenotype_runs = np.load('./exp1/Comp_phenotype_bubblesort.npy')
+    hw_runs = np.load('./exp1/Hw_bubblesort_9.npy')
+    comp_genome_runs = np.load('./exp1/Comp_genome_bubblesort_9.npy')
+    comp_phenotype_runs = np.load('./exp1/Comp_phenotype_bubblesort_9.npy')
+
+    hw_runs = hw_runs[:tar, :]
+    comp_genome_runs = comp_genome_runs[:, :tar, :] 
+    comp_phenotype_runs = comp_phenotype_runs[:, :tar, :]
 
     m_hw = np.mean(hw_runs, axis = 0)
     var_hw = np.std(hw_runs, axis = 0)/np.sqrt(config['Loops'])
-    plt.plot(range(1, config['RUNS']+1), m_hw, label='Hardwired Genotypic-Fitness (no swaps)', linestyle='--', color='black', linewidth=2)
-    plt.fill_between(range(1, config['RUNS']+1), m_hw-2*var_hw, m_hw+2*var_hw, alpha = 0.2)
+    plt.plot(range(1, len(m_hw)+1), m_hw, label='Hardwired Genotypic-Fitness (no swaps)', linestyle='--', color='black', linewidth=2)
+    plt.fill_between(range(1, len(m_hw)+1), m_hw-2*var_hw, m_hw+2*var_hw, alpha = 0.2)
 
     for b in range(len(bubbles)):
+        # if bubbles[b] ==100:
         m_comp = np.mean(comp_genome_runs[b, : , :], axis = 0)
         var_comp = np.std(comp_genome_runs[b, :, :], axis = 0)/np.sqrt(config['Loops'])
-        plt.plot(range(1, config['RUNS']+1), m_comp, label = 'Competent Genotypic-Fitness ({} swaps)'.format(bubbles[b]), linestyle='--')
-        plt.fill_between(range(1, config['RUNS']+1), m_comp-2*var_comp, m_comp + 2*var_comp, alpha = 0.2)
+        plt.plot(range(1, len(m_comp)+1), m_comp, label = 'Competent Genotypic-Fitness ({} swaps)'.format(bubbles[b]), linestyle='--')
+        plt.fill_between(range(1, len(m_comp)+1), m_comp-2*var_comp, m_comp + 2*var_comp, alpha = 0.2)
+
 
         m_comp = np.mean(comp_phenotype_runs[b, : , :], axis = 0)
         var_comp = np.std(comp_phenotype_runs[b, :, :], axis = 0)/np.sqrt(config['Loops'])
-        plt.plot(range(1, config['RUNS']+1), m_comp, label = 'Competent Phenotypic-Fitness ({} swaps)'.format(bubbles[b]))
-        plt.fill_between(range(1, config['RUNS']+1), m_comp-2*var_comp, m_comp + 2*var_comp, alpha = 0.2)
+        plt.plot(range(1, len(m_comp)+1), m_comp, label = 'Competent Phenotypic-Fitness ({} swaps)'.format(bubbles[b]))
+        plt.fill_between(range(1, len(m_comp)+1), m_comp-2*var_comp, m_comp + 2*var_comp, alpha = 0.2)
 
  
     plt.xlabel('Generation')
     plt.ylabel('Fitness of best Individual')
     plt.legend(loc='lower right')
     plt.tight_layout()
-    plt.savefig('exp1_compVsHw')
+    plt.savefig('plots/F1/exp1_compVsHw_panel1')
 
 
 if __name__ == '__main__':
@@ -81,7 +86,7 @@ if __name__ == '__main__':
             'HIGH' : 51, 
             'SIZE' : 50,
             'N_organisms' : 100,
-            'RUNS' : 100,
+            'RUNS' : 1000,
             'Mutation_Probability' : 0.6,
             'LIMIT': 50,
             'MAX_FIELD' : 50,
@@ -90,7 +95,7 @@ if __name__ == '__main__':
             'ExpFitness': True,
             'BubbleLimit': 0,
             'viewfield': 1,
-            'Loops': 10,
+            'Loops': 20,
         }
 
     bubbles = np.array([0, 20, 100, 400])
@@ -109,8 +114,10 @@ if __name__ == '__main__':
             cp_gen_fits, cp_cmp_fits = run_ga(config, HW=False)
             comp_genome_runs[k, yu, :], comp_phenotype_runs[k, yu, :] = cp_gen_fits, cp_cmp_fits 
 
-    np.save('./exp1/Hw_bubblesort', hw_runs)
-    np.save('./exp1/Comp_genome_bubblesort', comp_genome_runs)
-    np.save('./exp1/Comp_phenotype_bubblesort', comp_phenotype_runs) 
+        if yu %2 ==0:
+            print('Saving... \n')
+            np.save('./exp1/Hw_bubblesort_{}'.format(yu), hw_runs)
+            np.save('./exp1/Comp_genome_bubblesort_{}'.format(yu), comp_genome_runs)
+            np.save('./exp1/Comp_phenotype_bubblesort_{}'.format(yu), comp_phenotype_runs) 
 
-    plot_all(bubbles)
+    plot_all(bubbles, tar =10)
